@@ -20,7 +20,7 @@ typedef struct
 
 typedef struct
 {
-  SensorData SensorData;
+  SensorData sensorData;
   int ductCycle;
 } LCDData;
 
@@ -69,7 +69,7 @@ int selectDutyCycle(SensorData sensorData) {
 
 void sendDecision(int dutyCycle) {
     String decision = String(dutyCycle) + BLUETOOTH_END_CHARACTER;
-    Serial.write(&decision[0]);
+    Serial.print(&decision[0]);
 }
 
 LCDData handleMessage(String message) {
@@ -83,10 +83,10 @@ void printOnLCD(LCDData lcdData) {
     lcd.clear();
     
     lcd.setCursor(0, 1);
-    lcd.print("Temperature: " + String(lcdData.SensorData.temperature));
+    lcd.print("Temperature: " + String(lcdData.sensorData.temperature));
 
     lcd.setCursor(0, 2);
-    lcd.print("Humidity: " + String(lcdData.SensorData.humidity));
+    lcd.print("Humidity: " + String(lcdData.sensorData.humidity));
     
     lcd.setCursor(0, 3);
     lcd.print("Decision(Duty Cycle): " + String(lcdData.ductCycle) + "%");
@@ -99,16 +99,18 @@ void setup() {
 }
 
 void loop() {
-  String msg = Serial.readString();
-  if (msg != "") {
-      msgBuffer += msg;
-      // if end of Bluetooth message is reached
-      if (msgBuffer.indexOf(BLUETOOTH_END_CHARACTER) != -1) 
-      {
-          LCDData lcdData = handleMessage(msgBuffer);
-          printOnLCD(lcdData);
-          msgBuffer = "";
-      }
-      
-  }
+//   String msg = Serial.readString();
+//   if (msg != "") {
+//       msgBuffer += msg;
+//       // if end of Bluetooth message is reached
+//       if (msgBuffer.indexOf(BLUETOOTH_END_CHARACTER) != -1) 
+//       {
+//           LCDData lcdData = handleMessage(msgBuffer);
+//           printOnLCD(lcdData);
+//           msgBuffer = "";
+//       }  
+//   }
+    float rate = 10.0;
+    Serial.println(rate);
+    delay(1000);
 }
