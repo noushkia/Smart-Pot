@@ -6,9 +6,9 @@
 #define BLUETOOTH_END_CHARACTER '/'
 #define BLUETOOTH_BAUD_RATE 9600
 
-float lastHumidity = 0.0;
+double lastHumidity = 0.0;
 
-float getHumidity() {
+double getHumidity() {
   unsigned int data[2];
   Wire.beginTransmission(SENSOR_ADDR);  
 
@@ -25,7 +25,7 @@ float getHumidity() {
   }
 }
 
-float getTemperature(){
+double getTemperature(){
   unsigned int data[2];
   Wire.beginTransmission(SENSOR_ADDR);  
 
@@ -55,10 +55,10 @@ void setup() {
 }
 
 void loop() {
-    float currHumidity = getHumidity();
-    float currTemp = getTemperature();
-    if (fabs(currHumidity - lastHumidity) > 5.0 || lastHumidity == 0.0) {
-        lastHumidity = currHumidity;
-        sendSensorData(currHumidity, currTemp);
-    }
+  double currHumidity = getHumidity();
+  double currTemp = getTemperature();
+  if (fabs(currHumidity - lastHumidity) > 5.0 || lastHumidity == 0.0) {
+      lastHumidity = currHumidity;
+      sendSensorData(currHumidity, currTemp);
+  }
 }
