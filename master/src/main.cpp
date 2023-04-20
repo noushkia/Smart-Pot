@@ -8,32 +8,45 @@
 #define D5_LCD 4  
 #define D6_LCD 3 
 #define D7_LCD 2
-#define BLUETOOTH_DELIMETER_CHARACTER '-'
-#define BLUETOOTH_END_CHARACTER '/'
 #define BLUETOOTH_BAUD_RATE 9600
+#define DELIMITER '#'
 
 typedef struct
 {
-    double humidity;
-    double temperature;
+    float humidity;
+    float temperature;
 } SensorData;
 
 typedef struct
 {
-  SensorData sensorData;
-  int ductCycle;
+    SensorData sensorData;
+    int ductCycle;
 } LCDData;
 
-String msgBuffer = "";
-
 LiquidCrystal lcd(RS_LCD, EN_LCD, D4_LCD, D5_LCD, D6_LCD, D7_LCD);
+String buffer = "";
 
-SensorData getSensorData(String sensorMessage) {
-    int delimeterIndex = sensorMessage.indexOf(BLUETOOTH_DELIMETER_CHARACTER);
-    int endIndex = sensorMessage.indexOf(BLUETOOTH_END_CHARACTER);
-    String lastHumidityValueStr = sensorMessage.substring(0, delimeterIndex);
-    String lastTempValueStr = sensorMessage.substring(delimeterIndex + 1, endIndex);
-    return SensorData{atof(&lastHumidityValueStr[0]), atof(&lastTempValueStr[0])};
+float getData() {
+    while(true) {
+        if(!Serial.available()) {
+            continue;
+        }
+
+        char temp = (char) Serial.read();
+        if (temp == DELIMITER) {
+            float data = buffer.toFloat();
+            buffer = "";
+            return data;
+        }
+        buffer += temp;
+    }
+}
+
+SensorData getSensorData() {
+    SensorData data;
+    data.humidity = getData();
+    data.temperature = getData();
+    return data;
 }
 
 int selectDutyCycle(SensorData sensorData) {
@@ -68,49 +81,37 @@ int selectDutyCycle(SensorData sensorData) {
 }
 
 void sendDecision(int dutyCycle) {
-    String decision = String(dutyCycle) + BLUETOOTH_END_CHARACTER;
-    Serial.print(&decision[0]);
+    Serial.println(dutyCycle);
 }
 
-LCDData handleMessage(String message) {
-    SensorData sensorData = getSensorData(message);
+LCDData handleMessage() {
+    SensorData sensorData = getSensorData();
+    lcd.clear();
+    lcd.println(sensorData.humidity);
     int dutyCycle = selectDutyCycle(sensorData);
-    sendDecision(dutyCycle);
+    // sendDecision(dutyCycle);
     return LCDData{sensorData, dutyCycle};
 }
 
 void printOnLCD(LCDData lcdData) {
     lcd.clear();
-    
-    lcd.setCursor(0, 1);
-    lcd.print("Temperature: " + String(lcdData.sensorData.temperature));
-
-    lcd.setCursor(0, 2);
-    lcd.print("Humidity: " + String(lcdData.sensorData.humidity));
-    
-    lcd.setCursor(0, 3);
-    lcd.print("Decision(Duty Cycle): " + String(lcdData.ductCycle) + "%");
+    lcd.println("T: " + String(lcdData.sensorData.temperature));
+    lcd.println("H: " + String(lcdData.sensorData.humidity));
+    lcd.println("Decision: " + String(lcdData.ductCycle) + "%");
 }
 
 void setup() {
-  Serial.begin(BLUETOOTH_BAUD_RATE);
-  lcd.begin(20, 4);
-  lcd.print("Hello World!");
+    Serial.begin(BLUETOOTH_BAUD_RATE);
+    lcd.begin(20, 4);
+    lcd.println("Hello World!");
 }
 
 void loop() {
-//   String msg = Serial.readString();
-//   if (msg != "") {
-//       msgBuffer += msg;
-//       // if end of Bluetooth message is reached
-//       if (msgBuffer.indexOf(BLUETOOTH_END_CHARACTER) != -1) 
-//       {
-//           LCDData lcdData = handleMessage(msgBuffer);
-//           printOnLCD(lcdData);
-//           msgBuffer = "";
-//       }  
-//   }
-    float rate = 10.0;
-    Serial.println(rate);
-    delay(1000);
+    // LCDData data = handleMessage();
+    // printOnLCD(data);
+    if (Serial.available()) {
+        lcd.println("KOS NANE KARGAHI");    
+        String data = Serial.readStringUntil('\n');
+        lcd.println(data);
+    }
 }

@@ -20,8 +20,9 @@ void handleMessage(String message) {
 }
 
 void setup() {
-  pinMode(11, OUTPUT);
-  Serial.begin(BLUETOOTH_BAUD_RATE);
+  pinMode(8, OUTPUT);
+  pinMode(9, OUTPUT);
+  // Serial.begin(BLUETOOTH_BAUD_RATE);
 }
 
 void loop() {
@@ -30,7 +31,8 @@ void loop() {
   //     continue;
   //   float rate = Serial.parseFloat();
   //   Serial.println(rate);
-  analogWrite(11, 234);
+  digitalWrite(8, HIGH);
+  analogWrite(9, 255);
     // if (msg != "") {
     //     msgBuffer += msg;
     //     // if end of Bluetooth message is reached
